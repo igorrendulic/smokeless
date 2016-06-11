@@ -1,0 +1,34 @@
+
+<ion-view view-title="Dashboard">
+	<ion-content class="padding">
+		
+		<div class="row">
+	   		<div class="col text-center">
+				<button class="button button-calm button-large" ng-click="addsmoke()">
+	  				Log Smoke
+				</button>
+			</div>
+		</div>
+
+		 <ion-list>
+		 	<ion-item>
+		 		Smoked today
+		 		<span class="badge badge-assertive">{{smokesPerDay.count}}</span>
+		 	</ion-item>
+		 	<ion-item>
+		 		Average Per Day
+		 		<span class="badge badge-balanced">{{averagePerDay | number:2}}</span>
+		 	</ion-item>
+		 	<ion-item>
+		 		Smoked overall
+		 		<span class="badge badge-balanced">{{numberOfOverallSmokes}}</span>
+		 	</ion-item>
+		</ion-list>
+		<div class="card assertive">
+        	<div class="item item-text-wrap">
+            	Money saved <span class="badge badge-positive">{{moneySaved | number:2}} $</span>
+          	</div>
+      	</div>
+
+	</ion-content>
+</ion-view>

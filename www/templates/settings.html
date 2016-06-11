@@ -1,0 +1,23 @@
+<ion-view view-title="Dashboard">
+	<ion-content class="padding">
+		<div class="card">
+  			<div class="item item-text-wrap">
+    			Logged in as {{loggedInAs}}
+  			</div>
+		</div>
+		<div class="list">
+		  <label class="item item-input item-floating-label">
+		    <span class="input-label">Cigarettes smoked per day before logging</span>
+		    <input type="text" placeholder="Number of cigarettes smoked per day before logging" ng-model="settings.numberOfSmoked">
+		  </label>
+		  <label class="item item-input item-floating-label">
+		    <span class="input-label">Price per pack (20 cigarettes)</span>
+		    <input type="text" placeholder="Price per pack (20 cigrattes)" ng-model="settings.pricePerPack">
+		  </label>
+		</div>
+		
+		<button class="button button-full button-stable" ng-click="logout()">
+  			Logout
+		</button>
+	</ion-content>
+</ion-view>

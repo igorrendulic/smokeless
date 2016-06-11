@@ -1,0 +1,21 @@
+<ion-tabs class="tabs-icon-top">
+	<!-- Dashboard Tab -->
+	<ion-tab title="Dashboard" icon="icon ion-home" ng-click="goTab('dash')">
+		<ion-nav-view title="Dashboard" name="dash"></ion-nav-view>
+	</ion-tab>
+
+  	<!-- TimeLog Tab -->
+	<ion-tab title="Time Log" icon="icon ion-android-calendar" ng-click="goTab('list')">
+		<ion-nav-view title="Time Log" name="list"></ion-nav-view>
+	</ion-tab>
+
+	<!-- Social tab -->
+	<ion-tab title="Social" icon="icon ion-person-stalker" ng-click="goTab('social')">
+		<ion-nav-view title="Social" name="social"></ion-nav-view>
+	</ion-tab>
+
+	<!-- Settings tab -->
+	<ion-tab title="Settings" icon="icon ion-gear-b" ng-click="goTab('settings')">
+		<ion-nav-view title="Settings" name="settings"></ion-nav-view>
+	</ion-tab>
+</ion-tabs>

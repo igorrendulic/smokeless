@@ -1,0 +1,37 @@
+<ion-view view-title="Register" name="register-view">
+  <ion-content class="padding">
+
+    <form name="registerForm">
+        <div ng-show="registerError">{{errorMessage}}</div>
+        <div class="list">
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">Full Name</span>
+          <input type="text" placeholder="John Smith" name="fullname" ng-model="register.username" required ng-minlength="4"/>
+          <div ng-messages="registerForm.fullname.$error" style="color:red" role="alert">
+            <div ng-message="required" ng-if="!registerForm.fullname.$pristine">Please enter your name</div>
+            <div ng-message="minlength" ng-if="!registerForm.fullname.$pristine">Name is too short</div>
+          </div>
+        </label>
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">E-Mail</span>
+          <input type="email" placeholder="email@email.com" name="email" ng-model="register.email" required  />
+          <div ng-messages="registerForm.email.$error" style="color:red" role="alert">
+            <div ng-message="required" ng-if="!registerForm.email.$pristine">Please enter your E-Mail</div>
+            <div ng-message="email" ng-if="!registerForm.email.$pristine">E-Mail not valid</div>
+          </div>
+        </label>
+        <label class="item item-input item-stacked-label">
+          <span class="input-label">Password</span>
+          <input type="password" placeholder="" name="password" ng-model="register.password" required ng-minlength="5" />
+          <div ng-messages="registerForm.password.$error" style="color:red" role="alert">
+            <div ng-message="required" ng-if="!registerForm.password.$pristine">Please enter your password</div>
+            <div ng-message="minlength" ng-if="!registerForm.password.$pristine">Password too short</div>
+          </div>
+        </label>
+      </div>
+      <button type="submit" class="button button-full button-positive" ng-click="register()">Submit</button>
+    </form>
+    <br/><br/>
+  <a nav-direction="forward" href="#/">I'm already a registered user! Let me login!</a>
+  </ion-content>
+</ion-view>

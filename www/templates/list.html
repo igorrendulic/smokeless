@@ -1,0 +1,18 @@
+
+<ion-view view-title="Dashboard">
+	<ion-content class="padding">
+		<ion-list>
+
+		   <ion-item-options  side="right">
+		 
+		    <ion-item ng-repeat="smoke in smokes">
+		    	<ion-option-button class="button-assertive icon ion-trash-a" ng-click="removeSmoke(smoke)"></ion-option-button>
+		    	{{smoke.timestamp | date:'MM/dd/yyyy'}} {{smoke.timestamp | date :'HH:mm:ss'}}
+		    </ion-item>
+		  	
+		    </ion-item-options>
+		 
+		  </ion-list>
+	<ion-content>
+</ion-view>
+	
