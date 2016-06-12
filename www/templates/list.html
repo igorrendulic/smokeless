@@ -1,6 +1,8 @@
-
+<div class="bar bar-header">
+  <h1 class="title">Log list</h1>
+</div>
 <ion-view view-title="Dashboard">
-	<ion-content class="padding">
+	<ion-content class="padding has-header">
 		<ion-list>
 
 		   <ion-item-options  side="right">
@@ -13,6 +15,8 @@
 		    </ion-item-options>
 		 
 		  </ion-list>
+		   <ion-infinite-scroll on-infinite="loadMore()" distance="1%" ng-if="!noMoreItemsAvailable">
+		  </ion-infinite-scroll>
 	<ion-content>
 </ion-view>
 	

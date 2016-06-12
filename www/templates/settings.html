@@ -1,9 +1,13 @@
-<ion-view view-title="Dashboard">
-	<ion-content class="padding">
+<div class="bar bar-header">
+  <h1 class="title">Settings</h1>
+</div>
+<ion-nav-view view-title="Dashboard">
+	<ion-content class="padding has-header">
 		<div class="card">
   			<div class="item item-text-wrap">
-    			Logged in as {{loggedInAs}}
+    			Logged in as {{users.fullname}}
   			</div>
+  			<button class="button button-full button-stable" ng-click="takePhoto()">Take profile photo</button>
 		</div>
 		<div class="list">
 		  <label class="item item-input item-floating-label">
@@ -15,9 +19,8 @@
 		    <input type="text" placeholder="Price per pack (20 cigrattes)" ng-model="settings.pricePerPack">
 		  </label>
 		</div>
-		
 		<button class="button button-full button-stable" ng-click="logout()">
   			Logout
 		</button>
 	</ion-content>
-</ion-view>
+</ion-nav-view>

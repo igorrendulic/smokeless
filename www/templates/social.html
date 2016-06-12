@@ -1,26 +1,47 @@
-
+<div class="bar bar-header">
+  <h1 class="title">Social</h1>
+  <button class="button button-positive icon-chatbubble" ng-click="addNewPost()">Add Post</button>
+</div>
 <ion-view view-title="Dashboard">
-  <ion-content class="padding">
-    <div class="list card">
+  <ion-content class="padding has-header">
+    <div class="padding-top"></div>
+    <div class="list card" ng-repeat="item in social">
 
       <div class="item item-avatar">
-        <img src="mcfly.jpg">
-        <h2>Marty McFly</h2>
-        <p>November 05, 1955</p>
+        <img src="img/nopicture.jpg">
+        <h2>{{item.authorName}}</h2>
+        <p>{{item.timestamp | date:'short'}}</p>
+        <div style="position: absolute; right: 20px; top: 10px;">
+          <button class="button icon ion-heart" ng-click="submitLike(item)">{{!item.likes ? ' 0' : ' ' + item.likes.length}} Likes</button>
+        </div>
       </div>
 
       <div class="item item-body">
         <p>
-          This is a "Facebook" styled Card. The header is created from a Thumbnail List item,
-          the content is from a card-body consisting of an image and paragraph text. The footer
-          consists of tabs, icons aligned left, within the card-footer.
+          {{item.message}}
         </p>
         <p>
-          <a href="#" class="subdued">1 Like</a>
-          <a href="#" class="subdued">5 Comments</a>
+          <a href="#" ng-click="showComments = !showComments" class="subdued">{{!item.comments ? '0' : item.comments.length}} Comments</a>
         </p>
       </div>
-
+      <div ng-show="showComments">
+        <div class="list" ng-repeat="comment in item.comments">
+          <a class="item item-avatar" href="#">
+            <img src="img/nopicture.jpg">
+            <h2>{{comment.authorName}} ({{comment.timestamp | date:'short'}})</h2>
+            <p>{{comment.message}}</p>
+          </a>
+        </div> 
+        
+      </div>
+      <div class="item item-body">
+          <form>
+             <label class="item item-input">
+                  <input type="text" ng-model="social.newcomment" placeholder="Type in your comment here">
+              </label>
+              <button type="submit" class="button button-full button-balanced" ng-click="submitNewComment(item)" >Submit comment</button>
+          </form>
+        </div>
     </div>
   </ion-content>
 </ion-view>

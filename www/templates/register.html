@@ -6,7 +6,7 @@
         <div class="list">
         <label class="item item-input item-stacked-label">
           <span class="input-label">Full Name</span>
-          <input type="text" placeholder="John Smith" name="fullname" ng-model="register.username" required ng-minlength="4"/>
+          <input type="text" placeholder="John Smith" name="fullname" ng-model="register.fullname" required ng-minlength="4"/>
           <div ng-messages="registerForm.fullname.$error" style="color:red" role="alert">
             <div ng-message="required" ng-if="!registerForm.fullname.$pristine">Please enter your name</div>
             <div ng-message="minlength" ng-if="!registerForm.fullname.$pristine">Name is too short</div>

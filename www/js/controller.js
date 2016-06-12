@@ -7,99 +7,21 @@ app.controller("SmokeController", function($scope, $firebaseArray, $firebaseObje
   $scope.loggedInEmail = currentAuth.email;
 
   var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
-  var query = ref.orderByChild("priority");
+  var query = ref.orderByChild("priority").limitToFirst(100);
   $scope.smokes =  $firebaseArray(query);
 
-  $scope.smokes.$watch(function(event) {
-    var today = new Date();
-    $scope.numberOfTodaySmokes = 0;
-    $scope.numberOfOverallSmokes = 0;
-    var limitOf10 = [];
-      var limitOf4 = [];
-      var smokedByDay = [];
-      var smokedByDate = [];
-      var days = {};
+  //TODO: not yet implemented in Firebase 3.0 (06/10/2016)
 
-    $scope.smokes.forEach(function(data) {
-      var recordDate = new Date(data.timestamp);
-      var dateKey = (recordDate.getMonth() + 1)  + "/" + recordDate.getDate() + "/" + recordDate.getFullYear();
-
-      if (!(dateKey in days)) {
-        limitOf10.push(10);
-        limitOf4.push(4);
-        days[dateKey] = 1;
-      } else {
-        var num = days[dateKey];
-        num +=1;
-        days[dateKey] = num;
-      }
-
-      if (today.getFullYear() == recordDate.getFullYear() 
-            && today.getMonth() == recordDate.getMonth() && today.getDay() == recordDate.getDay()) {
-            
-            $scope.numberOfTodaySmokes += 1;
-          }
-          $scope.numberOfOverallSmokes += 1;
-    });
-    
-    for (var key in days) {
-      if (days.hasOwnProperty(key)) {
-        smokedByDay.push(days[key]);
-        smokedByDate.push(key);
-      }
-    }
-    $scope.smokeChartConfig = {
-      "options": {
-        "chart": {
-          "type": "areaspline"
-        },
-        "plotOptions": {
-          "series": {
-            "stacking": ""
-          }
-        }
-      },
-      "series": [
-        {
-          "name": "10 per day",
-          "data": limitOf10,
-          "id": "series-0"
-        },
-        {
-          "name": "4 per day",
-          "data": limitOf4,
-          "id": "series-1"
-        },
-        {
-          "name": "You smoked",
-          "data": smokedByDay,
-          "type": "column",
-          "id": "series-2"
-        }
-      ],
-      "title": {
-        "text": "SmokeLess Chart"
-      },
-      "xAxis": {
-        "type": "datetime",
-        "labels":{
-          "enabled":true
-        },
-        "categories":smokedByDate
-      },
-      "yAxis": {
-                "title": {
-                    "text": 'Smoked'
-                },
-                "tickInterval": 1,
-            },
-      "credits": {
-        "enabled": true
-      },
-      "loading": false,
-      "size": {}
-    }
-  });
+  // $scope.noMoreItemsAvailable = true;
+  // $scope.loadMore = function() {
+  //   console.log('load more!');
+  //   var query = ref.orderByChild("priority").limitToFirst(20);
+  //   $scope.smokes =  $firebaseArray(query);
+  //   $scope.$broadcast('scroll.infiniteScrollComplete');
+  // };
+  // $scope.$on('$stateChangeSuccess', function() {
+  //   $scope.loadMore();
+  // });
 
   $scope.removeSmoke = function(smoke) {
     $scope.smokes.$remove(smoke);
@@ -211,7 +133,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
 
 });
 
-app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject, login, currentAuth, Utils) {
+app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject, login, currentAuth, Utils, $ionicPlatform, $cordovaCamera) {
   if (currentAuth == null) {
     $state.go('/');
   } 
@@ -223,11 +145,41 @@ app.controller("SettingsController", function($scope, $state, Auth,$firebaseObje
 
   syncSettings.$bindTo($scope, "settings");
 
+  var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
+  var syncUsers = $firebaseObject(userRef);
+  syncUsers.$bindTo($scope, "users");
+
     $scope.logout = function() {
       console.log("logging out");
       Auth.$signOut();
       $state.go('login');
       document.location.href="/";
+    };
+
+    $scope.takePhoto = function() {
+        $ionicPlatform.ready(function() {
+            console.log("TODO: photos upload");
+            var options = {
+                quality: 75,
+                destinationType: Camera.DestinationType.DATA_URL,
+                sourceType: Camera.PictureSourceType.CAMERA,
+                allowEdit: true,
+                encodingType: Camera.EncodingType.JPEG,
+                targetWidth: 100,
+                targetHeight: 100,
+                popoverOptions: CameraPopoverOptions,
+                saveToPhotoAlbum: false,
+              correctOrientation:true
+          };
+
+          $cordovaCamera.getPicture(options).then(function(imageData) {
+            var image = document.getElementById('myImage');
+            image.src = "data:image/jpeg;base64," + imageData;
+          }, function(err) {
+            // error
+            console.error(err);
+          });
+        });
     };
 
 });
@@ -238,12 +190,18 @@ app.controller('GroupTabsController', function ($scope, $state) {
   };
 });
 
-app.controller('RegisterController', function($scope, $state, Auth, Utils) {
+app.controller('RegisterController', function($scope, $state, Auth, Utils, $firebaseObject) {
   var ref = firebase.database().ref();
 
   Auth.$onAuthStateChanged(function(firebaseUser) {
   if (firebaseUser) {
     console.log("Logged in as:", firebaseUser.uid);
+
+    var refUsers = firebase.database().ref().child("users/" + firebaseUser.uid);
+    var users = $firebaseObject(refUsers);
+    users.$bindTo($scope, "users");
+    users.fullname = $scope.register.fullname;
+    users.$save();
     $state.go('tabs.dash');
   } else {
     console.log("Logged out");
@@ -252,11 +210,10 @@ app.controller('RegisterController', function($scope, $state, Auth, Utils) {
 
   $scope.register = function() {
     
-    if ($scope.register.username && $scope.register.email && $scope.register.password) {
-      console.log('Here we are');
+    if ($scope.register.fullname && $scope.register.email && $scope.register.password) {
+
       Auth.$createUserWithEmailAndPassword($scope.register.email, $scope.register.password).then(function(firebaseUser) {
-        console.log(user);
-        return user;
+        return firebaseUser;
       }).catch(function(error) {
         $scope.registerError = "true";
         $scope.errorMessage = "" + error;
@@ -266,9 +223,83 @@ app.controller('RegisterController', function($scope, $state, Auth, Utils) {
   };
 });
 
-app.controller('SocialController', function($scope,$state,Auth) {
-  console.log('social');
+app.controller('SocialController', function($scope,$state, Auth, currentAuth, $firebaseArray, $firebaseObject, $ionicPopup) {
+  var ref = firebase.database().ref().child("social");
+  var query = ref.orderByChild("priority").limitToFirst(100);
+  $scope.social =  $firebaseArray(query);
+
+  var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
+  var syncUsers = $firebaseObject(userRef);
+  syncUsers.$bindTo($scope, "users");
+
+  $scope.addNewPost = function() {
+    var myPopup = $ionicPopup.show({
+    template: '<textarea ng-model="social.post" rows="10" cols="10"></textarea>',
+    title: 'Add new Post',
+    subTitle: 'Please be respectful to others',
+    scope: $scope,
+    buttons: [
+      { text: 'Cancel' },
+      {
+        text: '<b>Save</b>',
+        type: 'button-positive',
+        onTap: function(e) {
+          if (!$scope.social.post) {
+            //don't allow the user to close unless he enteres some text
+            e.preventDefault();
+          } else {
+            syncUsers.$loaded().then(function(users) {
+                $scope.social.$add({
+                  timestamp: new Date().getTime(),
+                  priority: 0 - new Date().getTime(),
+                  message: $scope.social.post,
+                  authorId: currentAuth.uid,
+                  authorName: users.fullname
+                });
+            });
+            
+          }
+        }
+      }
+    ]
+  });
+  };
+
+  $scope.submitNewComment = function(item) {
+    console.log(item);
+    if ($scope.social.newcomment) {
+      syncUsers.$loaded().then(function(users) {
+        var comments = item.comments;
+        if (!comments) {
+          comments = [];
+        }
+        var comment = {};
+        comment.message = $scope.social.newcomment;
+        comment.timestamp = new Date().getTime();
+        comment.authorId = currentAuth.uid;
+        comment.authorName = users.fullname;
+        comments.push(comment);
+        item.comments = comments;
+        $scope.social.$save(item);
+        $scope.social.newcomment = null;
+      });
+    }
+  };
+
+  $scope.submitLike = function(item) {
+    syncUsers.$loaded().then(function(users) {
+         var likes = item.likes;
+         if (!likes) {
+          likes = [];
+        }
+        var like = {};
+        like.timestamp = new Date().getTime();
+        like.authorId = currentAuth.uid;
+        like.authorName = users.fullname;
+        likes.push(like);
+        item.likes = likes;
+        $scope.social.$save(item);
+    });
+  };
+ 
 });
-
-
-
