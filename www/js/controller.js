@@ -287,11 +287,26 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
   };
 
   $scope.submitLike = function(item) {
+    
+    // check if user already liked. If yes, unlike
+    if (item.likes) {
+      for (var i=item.likes.length; i--; ) {
+        var like = item.likes[i];
+        if (like.authorId == currentAuth.uid) {
+          item.likes.splice(i,1);
+          $scope.social.$save(item);
+          return;
+        }
+      }
+    }
+
+    // add like
     syncUsers.$loaded().then(function(users) {
-         var likes = item.likes;
-         if (!likes) {
+        var likes = item.likes;
+        if (!likes) {
           likes = [];
         }
+        
         var like = {};
         like.timestamp = new Date().getTime();
         like.authorId = currentAuth.uid;
