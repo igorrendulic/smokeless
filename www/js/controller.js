@@ -1,6 +1,7 @@
 app.controller("SmokeController", function($scope, $firebaseArray, $firebaseObject,SmokesPerDay, Auth, $location, currentAuth, Utils) {
 
-  if (currentAuth == null) {
+
+  if (Auth.$getAuth() == null) {
     $location.url('/'); 
   } 
 
@@ -78,7 +79,7 @@ app.controller("LoginController", function($scope, $state, Auth, login, $locatio
 
 app.controller("DashController", function($scope, Auth, login, $state, $firebaseArray,$firebaseObject,currentAuth, Utils, SmokesPerDay, SmokesPerDayList) {
   
-  if (currentAuth == null) {
+  if (Auth.$getAuth() == null) {
     $state.go('/');
   } 
 
@@ -134,7 +135,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
 });
 
 app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject, login, currentAuth, Utils, $ionicPlatform, $cordovaCamera) {
-  if (currentAuth == null) {
+  if (Auth.$getAuth() == null) {
     $state.go('/');
   } 
 
@@ -224,6 +225,11 @@ app.controller('RegisterController', function($scope, $state, Auth, Utils, $fire
 });
 
 app.controller('SocialController', function($scope,$state, Auth, currentAuth, $firebaseArray, $firebaseObject, $ionicPopup) {
+
+  if (Auth.$getAuth() == null) {
+    $state.go('/');
+  } 
+
   var ref = firebase.database().ref().child("social");
   var query = ref.orderByChild("priority").limitToFirst(100);
   $scope.social =  $firebaseArray(query);
