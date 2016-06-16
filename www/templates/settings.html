@@ -3,10 +3,18 @@
 </div>
 <ion-nav-view view-title="Dashboard">
 	<ion-content class="padding has-header">
+		 <a ng-show="networkProblems" class="item item-icon-left assertive" href="#">
+    		<i class="icon ion-wifi"></i>
+    		Experiencing network problems. Please try again.
+ 		 </a>
+
 		<div class="card">
-  			<div class="item item-text-wrap">
-    			Logged in as {{users.fullname}}
+  			<div class="item item-avatar">
+    			<img ng-if="users.profilephoto" ng-src="{{users.profilephoto}}" />
+    			<h2>Logged in as</h2>
+    			<p>{{users.fullname}}</p>
   			</div>
+  			<input type="file" id="cameraID" accept="image/*" capture="camera" style="visibility:hidden;" onchange="angular.element(this).scope().uploadPhoto(this)" />
   			<button class="button button-full button-stable" ng-click="takePhoto()">Take profile photo</button>
 		</div>
 		<div class="list">

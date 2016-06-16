@@ -27,10 +27,27 @@ app.factory("SmokesPerDay", function($firebaseObject) {
 });
 
 app.factory("SmokesPerDayList", function($firebaseArray) {
-	return function(currentAuth) {
+	return function(currentAuth, query) {
 		var ref = firebase.database().ref().child("smokesPerDay/" + currentAuth.uid);
 		return $firebaseArray(ref);
 	}
+});
+
+app.factory("ListOperations", function($firebaseArray) {
+	var limit = 100;
+	var initialLoad = function(currentAuth, ref) {
+		var query = ref.orderByChild("priority").limitToFirst(limit);
+		return $firebaseArray(query);
+	};
+
+	var loadFromStart = function(currentAuth, ref, startPriority) {
+		var query = ref.orderByChild("priority").startAt(startPriority).limitToFirst(limit);
+		return $firebaseArray(query);
+	};
+	return {
+		initialLoad: initialLoad,
+		loadFromStart: loadFromStart
+	};
 });
 
 app.service('Utils', function() {
@@ -47,7 +64,7 @@ app.service('Utils', function() {
 			var pricePerCig = parseFloat(pricePerPack) / 20.0;
 	    	var priceBefore = parseFloat(numberOfSmoked) * pricePerCig * days;
 	    	var priceNow = parseFloat(total) * pricePerCig;
-	    	console.log("Price now: " + priceNow + ", priceBefore: " + priceBefore);
+	    	// console.log("Price now: " + priceNow + ", priceBefore: " + priceBefore);
 	    	// if 10 per day now
 	    	saved = parseFloat(priceBefore - priceNow);
 	    	//$scope.moneySaved = savedToday;
@@ -56,38 +73,13 @@ app.service('Utils', function() {
     	return saved;
 	};
 
+	this.moneyspent = function(pricePerPack, numberOfSmoked, total) {
+		var spent = 0;
+		if (pricePerPack && numberOfSmoked && total > 0) {
+			var pricePerCig = parseFloat(pricePerPack) / 20.0;
+			spent = total * pricePerCig;
+		}
+		return spent;
+	};
+
 });
-
-// app.factory('$cordovaCamera', ['$q', function ($q) {
-
-//     return {
-//       getPicture: function (options) {
-//         var q = $q.defer();
-
-//         if (!navigator.camera) {
-//           q.resolve(null);
-//           return q.promise;
-//         }
-
-//         navigator.camera.getPicture(function (imageData) {
-//           q.resolve(imageData);
-//         }, function (err) {
-//           q.reject(err);
-//         }, options);
-
-//         return q.promise;
-//       },
-
-//       cleanup: function () {
-//         var q = $q.defer();
-
-//         navigator.camera.cleanup(function () {
-//           q.resolve();
-//         }, function (err) {
-//           q.reject(err);
-//         });
-
-//         return q.promise;
-//       }
-//     };
-//   }]);

@@ -13,7 +13,7 @@
 		 <ion-list>
 		 	<ion-item>
 		 		Smoked today
-		 		<span class="badge badge-assertive">{{smokesPerDay.count}}</span>
+		 		<span class="badge badge-assertive">{{smokesPerDay.count ? smokesPerDay.count : 0}}</span>
 		 	</ion-item>
 		 	<ion-item>
 		 		Average Per Day
@@ -27,6 +27,9 @@
 		<div class="card assertive">
         	<div class="item item-text-wrap">
             	Money saved <span class="badge badge-positive">{{moneySaved | number:2}} $</span>
+          	</div>
+          	<div class="item item-text-wrap">
+            	Money spent <span class="badge badge-assertive">{{moneySpent | number:2}} $</span>
           	</div>
       	</div>
 

@@ -1,28 +1,62 @@
-app.controller("SmokeController", function($scope, $firebaseArray, $firebaseObject,SmokesPerDay, Auth, $location, currentAuth, Utils) {
+app.controller("SmokeController", function($scope, ListOperations, $firebaseObject,SmokesPerDay, Auth, $location, currentAuth, Utils) {
 
 
   if (Auth.$getAuth() == null) {
     $location.url('/'); 
   } 
 
+  var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
+
   $scope.loggedInEmail = currentAuth.email;
 
-  var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
-  var query = ref.orderByChild("priority").limitToFirst(100);
-  $scope.smokes =  $firebaseArray(query);
+  $scope.smokes = ListOperations.initialLoad(currentAuth, ref);
 
-  //TODO: not yet implemented in Firebase 3.0 (06/10/2016)
-
-  // $scope.noMoreItemsAvailable = true;
-  // $scope.loadMore = function() {
-  //   console.log('load more!');
-  //   var query = ref.orderByChild("priority").limitToFirst(20);
-  //   $scope.smokes =  $firebaseArray(query);
-  //   $scope.$broadcast('scroll.infiniteScrollComplete');
+  // // TODO: move to utilitiy factory
+  // var smokesConcat = function(firebaseResults) {
+  //     firebaseResults.forEach(function(data) {
+  //         $scope.smokes.push(data);
+  //     }); 
   // };
-  // $scope.$on('$stateChangeSuccess', function() {
-  //   $scope.loadMore();
+
+  // smokesArray.$loaded().then(function() {
+  //   smokesConcat(smokesArray);
+  //   if (smokesArray.length < 9) {
+  //     $scope.endReached = true;
+  //   }
   // });
+
+  // smokesArray.$watch(function(event) {
+  //   console.log(event);
+  //   if (event.event == 'child_removed' || event.event == 'child_added') {
+  //     console.log('in here');
+  //   }
+  // });
+
+  // $scope.moreDataCanBeLoaded = function() {
+  //   if ($scope.endReached) {
+  //     return false;
+  //   }
+  //   return true;
+  // };
+
+  // $scope.loadMoreData = function() {
+  //   console.log('load more called');
+  //   if ($scope.smokes.length > 9) {
+  //     var lastItem = $scope.smokes[$scope.smokes.length - 1];
+  //     var smokesMore = ListOperations.loadFromStart(currentAuth, ref, lastItem.priority);
+  //     smokesMore.$loaded().then(function() {
+  //       if (smokesMore.length > 1) {
+  //         smokesConcat(smokesMore);
+  //       } else {
+  //         console.log("end reached = true");
+  //         $scope.endReached = true;
+  //       }
+  //       $scope.$broadcast('scroll.infiniteScrollComplete');
+  //     });
+  //   } else {
+  //     $scope.endReached = true;
+  //   }
+  // };
 
   $scope.removeSmoke = function(smoke) {
     $scope.smokes.$remove(smoke);
@@ -109,6 +143,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
     // calc money saved
     settingsObject.$loaded().then(function(settings) {
       $scope.moneySaved = Utils.moneysaved(settings.pricePerPack,settings.numberOfSmoked, total, days);
+      $scope.moneySpent = Utils.moneyspent(settings.pricePerPack, settings.numberOfSmoked, total);
     });
 
   });
@@ -134,7 +169,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
 
 });
 
-app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject, login, currentAuth, Utils, $ionicPlatform, $cordovaCamera) {
+app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject,$firebaseUtils, login, currentAuth, Utils) {
   if (Auth.$getAuth() == null) {
     $state.go('/');
   } 
@@ -147,8 +182,13 @@ app.controller("SettingsController", function($scope, $state, Auth,$firebaseObje
   syncSettings.$bindTo($scope, "settings");
 
   var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
-  var syncUsers = $firebaseObject(userRef);
-  syncUsers.$bindTo($scope, "users");
+  var userObject = $firebaseObject(userRef);
+  userObject.$bindTo($scope, "users");
+
+  $scope.profileLoaded = false;
+  userObject.$loaded().then(function() {
+    $scope.profileLoaded = true;
+  });
 
     $scope.logout = function() {
       console.log("logging out");
@@ -158,30 +198,36 @@ app.controller("SettingsController", function($scope, $state, Auth,$firebaseObje
     };
 
     $scope.takePhoto = function() {
-        $ionicPlatform.ready(function() {
-            console.log("TODO: photos upload");
-            var options = {
-                quality: 75,
-                destinationType: Camera.DestinationType.DATA_URL,
-                sourceType: Camera.PictureSourceType.CAMERA,
-                allowEdit: true,
-                encodingType: Camera.EncodingType.JPEG,
-                targetWidth: 100,
-                targetHeight: 100,
-                popoverOptions: CameraPopoverOptions,
-                saveToPhotoAlbum: false,
-              correctOrientation:true
-          };
-
-          $cordovaCamera.getPicture(options).then(function(imageData) {
-            var image = document.getElementById('myImage');
-            image.src = "data:image/jpeg;base64," + imageData;
-          }, function(err) {
-            // error
-            console.error(err);
-          });
-        });
+        var cameraEl = document.querySelector( '#cameraID' );
+        cameraEl.click();
     };
+
+    $scope.uploadPhoto = function() {
+
+      if ($scope.profileLoaded) {
+        var cameraEl = document.querySelector( '#cameraID' );
+        var file = cameraEl.files[0];
+        var storageRef = firebase.storage().ref();
+         var metadata = {
+          'contentType': file.type
+        };
+        var uploadTask = storageRef.child('profile/' + currentAuth.uid + "/" + file.name).put(file, metadata);
+        
+        uploadTask.on('state_changed', null, function(error) {
+          console.error('Upload failed:', error);
+          
+        }, function() {
+          var url = uploadTask.snapshot.metadata.downloadURLs[0];
+          console.log('File available at', url);
+          userObject.profilephoto = url;
+          $scope.users.profilephoto = url;
+          userObject.$save();
+        });
+      } else {
+        $scope.networkProblems = "true";
+      }
+
+    }; 
 
 });
 
@@ -260,7 +306,8 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
                   priority: 0 - new Date().getTime(),
                   message: $scope.social.post,
                   authorId: currentAuth.uid,
-                  authorName: users.fullname
+                  authorName: users.fullname,
+                  profilephoto: users.profilephoto
                 });
             });
             
@@ -284,6 +331,7 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
         comment.timestamp = new Date().getTime();
         comment.authorId = currentAuth.uid;
         comment.authorName = users.fullname;
+        comment.profilephoto = users.profilephoto;
         comments.push(comment);
         item.comments = comments;
         $scope.social.$save(item);
@@ -317,6 +365,7 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
         like.timestamp = new Date().getTime();
         like.authorId = currentAuth.uid;
         like.authorName = users.fullname;
+        like.profilephoto = users.profilephoto;
         likes.push(like);
         item.likes = likes;
         $scope.social.$save(item);

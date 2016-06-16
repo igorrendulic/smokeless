@@ -8,7 +8,8 @@
     <div class="list card" ng-repeat="item in social">
 
       <div class="item item-avatar">
-        <img src="img/nopicture.jpg">
+        <img ng-if="item.profilephoto" ng-src="{{item.profilephoto}}" />
+        <img ng-if="!item.profilephoto" ng-src="img/nopicture.jpg" />
         <h2>{{item.authorName}}</h2>
         <p>{{item.timestamp | date:'short'}}</p>
         <div style="position: absolute; right: 20px; top: 10px;">
@@ -18,16 +19,17 @@
 
       <div class="item item-body">
         <p>
-          {{item.message}}
+          <pre>{{item.message}}</pre>
         </p>
         <p>
           <a href="#" ng-click="showComments = !showComments" class="subdued">{{!item.comments ? '0' : item.comments.length}} Comments</a>
         </p>
       </div>
       <div ng-show="showComments">
-        <div class="list" ng-repeat="comment in item.comments">
-          <a class="item item-avatar" href="#">
-            <img src="img/nopicture.jpg">
+        <div class="list" ng-repeat="comment in item.comments" style="word-wrap: break-word;">
+          <a class="item item-avatar item-text-wrap" href="#">
+            <img ng-if="comment.profilephoto" ng-src="{{comment.profilephoto}}" />
+            <img ng-if="!comment.profilephoto" ng-src="img/nopicture.jpg" />
             <h2>{{comment.authorName}} ({{comment.timestamp | date:'short'}})</h2>
             <p>{{comment.message}}</p>
           </a>

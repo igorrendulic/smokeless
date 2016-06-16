@@ -2,21 +2,20 @@
   <h1 class="title">Log list</h1>
 </div>
 <ion-view view-title="Dashboard">
-	<ion-content class="padding has-header">
+	<ion-content class="padding has-header" infinite-scroll='loadMoreData()' infinite-scroll-distance='2'>
 		<ion-list>
 
 		   <ion-item-options  side="right">
-		 
+
 		    <ion-item ng-repeat="smoke in smokes">
 		    	<ion-option-button class="button-assertive icon ion-trash-a" ng-click="removeSmoke(smoke)"></ion-option-button>
 		    	{{smoke.timestamp | date:'MM/dd/yyyy'}} {{smoke.timestamp | date :'HH:mm:ss'}}
+		    	{{hasMore}}
 		    </ion-item>
 		  	
 		    </ion-item-options>
-		 
 		  </ion-list>
-		   <ion-infinite-scroll on-infinite="loadMore()" distance="1%" ng-if="!noMoreItemsAvailable">
-		  </ion-infinite-scroll>
+		  <ion-infinite-scroll ng-if="moreDataCanBeLoaded()" immediate-check="false" on-infinite="loadMoreData()" distance="10%"></ion-infinite-scroll>
 	<ion-content>
 </ion-view>
 	
