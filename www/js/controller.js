@@ -164,6 +164,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
         }
         smokesPerDay.count += 1;
         smokesPerDay.$save();
+        $scope.smokesPerDay.count = smokesPerDay.count;
     });
   };
 

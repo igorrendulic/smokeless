@@ -4,6 +4,24 @@ app.factory("Auth", ["$firebaseAuth",
   }
 ]);
 
+// monitoring internet connection state
+var connected = true;
+firebase.database().ref().child('.info/connected').on('value', function(connectedSnap) {
+  if (connectedSnap.val() === true) {
+    /* we're connected! */    
+    console.log("connected ok");
+    connected = true;
+  } else {
+    /* we're disconnected! */
+    connected = false;
+    setTimeout(function() {
+    	if (!connected) {
+			alert("You're currently offline! Don't worry. You're data is going to be synced as soon as internet connection is established.");
+		}
+    }, 4000);
+    
+  }
+});
 
 app.factory("login", function() {
   var loggedInUser = {};
