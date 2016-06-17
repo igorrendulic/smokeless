@@ -30,7 +30,9 @@ Step 2: Run local server root folder: ionic serve
 Once it works locally you can init it as firebase project and use FREE [Google's Firebase hosting](https://firebase.google.com/). For that you will need to follow Firebase deploy instructions:
 [Firebase tools install and deploy instructions](https://www.firebase.com/docs/hosting/guide/deploying.html)
 
-## Project dependencies (included in project)
+## Project dependencies
+
+No need to do anything. Already included in project.
 
 [Angular 1.5.3](https://angularjs.org/)
 
@@ -44,8 +46,31 @@ Once it works locally you can init it as firebase project and use FREE [Google's
 
 [Angular messages 1.5.6](https://docs.angularjs.org/api/ngMessages)
 
+## Firebase Storage Bucket Security Rules
+
+Rules allow to write only under authenticated users folder and allows any authenticated user to read file (needed for social part of the App when previewing posts and comments)
+
+```json
+service firebase.storage {
+  match /b/<PROJECT_ID>.appspot.com/o {
+    match /profile/{userId}/{allPaths=**} {
+    	allow read: if request.auth != null;
+      allow write:if request.auth.uid == userId;
+    }
+  }
+}
+```
+
+## Firebase Datastore Security Rules
+
+///
+
+## Known bugs
+
+*Deleting entry in Time Log should decrement matching data on corresponding date
+*Rotated user profile images if taken on iOS
+*Increment, Decrement smoke log after add/remove promise returned
 
 ## TODO
 
 - Clean up the code
-- improve security rules for storage buckets
