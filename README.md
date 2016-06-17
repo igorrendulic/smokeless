@@ -1,5 +1,9 @@
 # SmokeLess
 
+### Project Goals
+
+The main goal was for me to learn ionic, angular, firebase and angularfire frameworks and in progress create an app that would help people reduce or even quit smoking. Project demonstrated usage of new AngularFire 2.0 library with firebase 3.0 javascript library on top of HTML5 Hyrid mobile app framework Ionic. 
+
 You can download zip file or clone this git repo: git clone git@<span></span>github.com:igorrendulic/smokeless.git
 
 ## Install and run
@@ -26,10 +30,6 @@ Step 2: Run local server root folder: ionic serve
 Once it works locally you can init it as firebase project and use FREE [Google's Firebase hosting](https://firebase.google.com/). For that you will need to follow Firebase deploy instructions:
 [Firebase tools install and deploy instructions](https://www.firebase.com/docs/hosting/guide/deploying.html)
 
-## Project Goals
-
-The main goal was for me to learn ionic, angular, firebase and angularfire frameworks and in progress create an app that would help people reduce or even quit smoking.
-
 ## Project dependencies (included in project)
 
 [Angular 1.5.3](https://angularjs.org/)
@@ -48,3 +48,4 @@ The main goal was for me to learn ionic, angular, firebase and angularfire frame
 ## TODO
 
 - Clean up the code
+- improve security rules for storage buckets
