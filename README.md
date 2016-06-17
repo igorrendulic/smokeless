@@ -61,6 +61,10 @@ service firebase.storage {
 }
 ```
 
+## Firebase Datastore Security Rules
+
+///
+
 ## Known bugs
 
 *Deleting entry in Time Log should decrement matching data on corresponding date
