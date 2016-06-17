@@ -1,4 +1,32 @@
 {
-  ".read": true,
-  ".write": true
+	"rules": {
+    "settings":{
+      "$user_id":{
+				".read": "$user_id === auth.uid",
+				".write": "$user_id === auth.uid"
+      }
+    },
+    "users":{
+      "$user_id":{
+				".read": "$user_id === auth.uid",
+				".write": "$user_id === auth.uid"
+      }
+    },
+    "smokes":{
+      "$user_id":{
+				".read": "$user_id === auth.uid",
+				".write": "$user_id === auth.uid"
+      }
+    },
+      "smokesPerDay":{
+      "$user_id":{
+				".read": "$user_id === auth.uid",
+				".write": "$user_id === auth.uid"
+      }
+    },
+    "social":{
+			".read": "auth.uid != null",
+			".write": "auth.uid != null"
+    }
+	}
 }
