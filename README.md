@@ -44,6 +44,20 @@ Once it works locally you can init it as firebase project and use FREE [Google's
 
 [Angular messages 1.5.6](https://docs.angularjs.org/api/ngMessages)
 
+## Firebase Storage Bucket Security Rules
+
+Rules allow to write only under authenticated users folder and allows any authenticated user to read file (needed for social part of the App when previewing posts and comments)
+
+```json
+service firebase.storage {
+  match /b/<PROJECT_ID>.appspot.com/o {
+    match /profile/{userId}/{allPaths=**} {
+    	allow read: if request.auth != null;
+      allow write:if request.auth.uid == userId;
+    }
+  }
+}
+```
 
 ## TODO
 
