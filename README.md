@@ -28,7 +28,7 @@ Once it works locally you can init it as firebase project and use FREE [Google's
 
 ## Project Goals
 
-The main goal was for me to learn ionic, angular, firebase and angularfire frameworks. Javascript Libraries used:
+The main goal was for me to learn ionic, angular, firebase and angularfire frameworks and in progress create an app that would help people reduce or even quit smoking.
 
 ## Project dependencies (included in project)
 
