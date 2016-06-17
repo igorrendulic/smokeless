@@ -61,15 +61,59 @@ service firebase.storage {
 }
 ```
 
-## Firebase Datastore Security Rules
+## Firebase Datastore Security Rules Explained
 
-///
+You can find rules in database.rules.json file.
+
+All tables have strict security rules. Only authenticated user can view/write his own data (e.g. /settings/Axcrte..sd can read, write only when auth.uid equals "Axcrte..sd"). 
+
+Smokes and Social are lists of data so .indexOn is recommended (indexing data can come in handy if size of these two tables grow very large). indexOn corresponds to orderByChild('priority') $firebaseArray queries. 
+
+```json
+{
+  "rules": {
+    "settings":{
+      "$user_id":{
+        ".read": "$user_id === auth.uid",
+        ".write": "$user_id === auth.uid"
+      }
+    },
+    "users":{
+      "$user_id":{
+        ".read": "$user_id === auth.uid",
+        ".write": "$user_id === auth.uid"
+      }
+    },
+    "smokes":{
+      "$user_id":{
+        ".read": "$user_id === auth.uid",
+        ".write": "$user_id === auth.uid",
+        ".indexOn": ["priority"]
+      }
+    },
+      "smokesPerDay":{
+      "$user_id":{
+        ".read": "$user_id === auth.uid",
+        ".write": "$user_id === auth.uid"
+      }
+    },
+    "social":{
+      ".read": "auth.uid != null",
+      ".write": "auth.uid != null",
+      ".indexOn": ["priority"]
+    }
+  }
+}
+```
 
 ## Known bugs
 
-*Deleting entry in Time Log should decrement matching data on corresponding date
-*Rotated user profile images if taken on iOS
-*Increment, Decrement smoke log after add/remove promise returned
+1.Deleting entry in Time Log should decrement matching data on corresponding date
+
+2.Rotated user profile images if taken on iOS
+
+3.Increment, Decrement smoke log after add/remove promise returned
+
 
 ## TODO
 
