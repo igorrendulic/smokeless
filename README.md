@@ -63,10 +63,9 @@ service firebase.storage {
 
 ## Known bugs
 
-- Deleting entry in Time Log should decrement matching data on corresponding date
-- Rotated user profile images if taken on iOS
-- Increment, Decrement smoke log after add/remove promise returned (no need for transactions for now)
-- 
+*Deleting entry in Time Log should decrement matching data on corresponding date
+*Rotated user profile images if taken on iOS
+*Increment, Decrement smoke log after add/remove promise returned
 
 ## TODO
 
