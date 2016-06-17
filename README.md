@@ -30,7 +30,9 @@ Step 2: Run local server root folder: ionic serve
 Once it works locally you can init it as firebase project and use FREE [Google's Firebase hosting](https://firebase.google.com/). For that you will need to follow Firebase deploy instructions:
 [Firebase tools install and deploy instructions](https://www.firebase.com/docs/hosting/guide/deploying.html)
 
-## Project dependencies (included in project)
+## Project dependencies
+
+No need to do anything. Already included in project.
 
 [Angular 1.5.3](https://angularjs.org/)
 
