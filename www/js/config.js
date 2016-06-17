@@ -19,6 +19,16 @@ app.config(function($stateProvider, $urlRouterProvider) {
       }]
     }
   })
+  .state('chart', {
+      url: "/chart",
+      controller: "ChartController",
+      templateUrl:"templates/chart.html",
+      resolve: {
+        "currentAuth":["Auth", function(Auth) {
+        return Auth.$requireSignIn();
+      }]
+      }
+   })
    .state('tabs', {
       url: "/tabs",
       controller: "GroupTabsController",

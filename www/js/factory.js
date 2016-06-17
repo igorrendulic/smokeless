@@ -33,6 +33,14 @@ app.factory("SmokesPerDayList", function($firebaseArray) {
 	}
 });
 
+app.factory("SmokesForCharts", function($firebaseArray) {
+	return function(currentAuth) {
+		var ref = firebase.database().ref().child("smokesPerDay/" + currentAuth.uid);
+		var query = ref.limitToFirst(14);
+		return $firebaseArray(query);
+	}
+});
+
 app.factory("ListOperations", function($firebaseArray) {
 	var limit = 100;
 	var initialLoad = function(currentAuth, ref) {
@@ -55,7 +63,7 @@ app.service('Utils', function() {
 	// days since 1/1/1970
 	this.daynumber = function() {
 		var timezone = new Date().getTimezoneOffset() * 60 * 1000;
-		return Math.floor((Date.now() - timezone) / (1000 * 60 * 60 * 24));
+		return Math.floor((new Date().getTime() - timezone) / (1000 * 60 * 60 * 24));
 	};
 
 	this.moneysaved = function(pricePerPack, numberOfSmoked, total, days) {
@@ -80,6 +88,11 @@ app.service('Utils', function() {
 			spent = total * pricePerCig;
 		}
 		return spent;
+	};
+
+	this.daynumberToDate = function(daynumber) {
+		var tzOffsetMs = new Date().getTimezoneOffset() * 60 * 1000;
+		return new Date(daynumber * 1000 * 60 * 60 * 24 + (tzOffsetMs));
 	};
 
 });

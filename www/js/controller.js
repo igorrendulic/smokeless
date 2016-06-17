@@ -167,6 +167,10 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
     });
   };
 
+  $scope.showChart = function() {
+    $state.go('chart');
+  };
+
 });
 
 app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject,$firebaseUtils, login, currentAuth, Utils) {
@@ -372,4 +376,63 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
     });
   };
  
+});
+
+app.controller('ChartController', function($scope,Auth, $firebaseArray, $state, SmokesForCharts, currentAuth, Utils) {
+  $scope.goBack = function() {
+    $state.go('tabs.dash');
+  };
+
+  var smokedUntilNow = SmokesForCharts(currentAuth);
+
+  smokedUntilNow.$watch(function(eventObject) {
+    var series = { name:"Smoked",colorByPoint:true, data:[] };
+    var count = 0;
+    smokedUntilNow.forEach(function(data) {
+        var date = Utils.daynumberToDate( data.$id);
+        var formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+        var dataPoint = { name: formattedDate, y: data.count};
+        series.data.push(dataPoint);
+        count++;
+    });
+
+    Highcharts.chart('container', {
+        chart: {
+            type: 'column'
+        },
+        title: {
+            text: 'Smokes cigarettes by day'
+        },
+        subtitle: {
+            text: 'Showing last two weeks'
+        },
+        xAxis: {
+            type: 'category'
+        },
+        yAxis: {
+            title: {
+                text: 'Number of smoked per day'
+            }
+
+        },
+        legend: {
+            enabled: false
+        },
+        plotOptions: {
+            series: {
+                borderWidth: 0,
+                dataLabels: {
+                    enabled: true,
+                    format: '{point.y}'
+                }
+            }
+        },
+        tooltip: {
+            headerFormat: '<span style="font-size:11px">{series.name}</span><br>',
+            pointFormat: '<span style="color:{point.color}">{point.name}</span>: <b>{point.y}</b><br/>'
+        },
+      series: [series]
+    });
+  });
+
 });
