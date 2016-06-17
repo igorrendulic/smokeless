@@ -67,7 +67,7 @@ You can find rules in database.rules.json file.
 
 All tables have strict security rules. Only authenticated user can view/write his own data (e.g. /settings/someUniqueUserId can read, write only when auth.uid equals "someUniqueUserId"). 
 
-Smokes and Social lists can grow fairly large. In this case indexing is recommended. [More on indexing](https://en.wikipedia.org/wiki/Database_index)
+Smokes and Social lists can grow fairly large. In this case indexing is recommended. [General Database indexing info](https://en.wikipedia.org/wiki/Database_index), [Firebase indexing documentation](https://www.firebase.com/docs/security/guide/indexing-data.html)
 
 .indexOn corresponds to orderByChild('priority') $firebaseArray queries. 
 
