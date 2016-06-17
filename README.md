@@ -50,7 +50,7 @@ No need to do anything. Already included in project.
 
 Rules allow to write only under authenticated users folder and allows any authenticated user to read file (needed for social part of the App when previewing posts and comments)
 
-```json
+```
 service firebase.storage {
   match /b/PROJECT_ID.appspot.com/o {
     match /profile/{userId}/{allPaths=**} {
