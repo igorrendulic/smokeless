@@ -1,12 +1,3 @@
-// Initialize Firebase
-var confFirebase = {
-  apiKey: "AIzaSyCjnw9VGC2Mtsv1DXeg_kznr50xxp3TjhE",
-  authDomain: "project-5518000328915581804.firebaseapp.com",
-  databaseURL: "https://project-5518000328915581804.firebaseio.com",
-  storageBucket: "project-5518000328915581804.appspot.com",
-};
-firebase.initializeApp(confFirebase);
-
 // Ionic Starter App
 
 // angular.module is a global place for creating, registering and retrieving Angular modules
