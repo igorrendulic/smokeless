@@ -48,7 +48,7 @@ No need to do anything. Already included in project.
 
 ## Firebase Storage Bucket Security Rules
 
-Rules allow to write only under authenticated users folder and allows any authenticated user to read file (needed for social part of the App when previewing posts and comments)
+Storabe bucket "profile" is secured. Writes are allowed only to a user who matches /profile/{userId} with auth.uid. Read are allowed to any user who is authenticated within the app. This is necessary because we wan't users to see others profile images in Social part of the app.
 
 ```
 service firebase.storage {
@@ -65,9 +65,11 @@ service firebase.storage {
 
 You can find rules in database.rules.json file.
 
-All tables have strict security rules. Only authenticated user can view/write his own data (e.g. /settings/Axcrte..sd can read, write only when auth.uid equals "Axcrte..sd"). 
+All tables have strict security rules. Only authenticated user can view/write his own data (e.g. /settings/someUniqueUserId can read, write only when auth.uid equals "someUniqueUserId"). 
 
-Smokes and Social are lists of data so .indexOn is recommended (indexing data can come in handy if size of these two tables grow very large). indexOn corresponds to orderByChild('priority') $firebaseArray queries. 
+Smokes and Social lists can grow fairly large. In this case indexing is recommended. [More on indexing](https://en.wikipedia.org/wiki/Database_index)
+
+.indexOn corresponds to orderByChild('priority') $firebaseArray queries. 
 
 ```json
 {
