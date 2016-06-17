@@ -52,7 +52,7 @@ Rules allow to write only under authenticated users folder and allows any authen
 
 ```json
 service firebase.storage {
-  match /b/<PROJECT_ID>.appspot.com/o {
+  match /b/PROJECT_ID.appspot.com/o {
     match /profile/{userId}/{allPaths=**} {
     	allow read: if request.auth != null;
       allow write:if request.auth.uid == userId;
