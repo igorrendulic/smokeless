@@ -110,13 +110,15 @@ Smokes and Social lists can grow fairly large. In this case indexing is recommen
 
 ## Known bugs
 
-1.Deleting entry in Time Log should decrement matching data on corresponding date
-
-2.Rotated user profile images if taken on iOS
-
-3.Increment, Decrement smoke log after add/remove promise returned
+1.Rotated user profile images if photo taken on iOS
 
 
 ## TODO
 
 - Clean up the code
+
+- Infinite Scroll on Social and Time Log
+
+## WARNING
+
+- Comments and Like are currently not suited for large number of comments/likes per Post. Comments and posts are currently nested in each Post. In order to scale move to it's own chil (e.g. /social/postId/comments, /social/postId/likes)
