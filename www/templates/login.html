@@ -5,6 +5,10 @@
   </ion-nav-back-button>
 </ion-nav-bar>
   <ion-content class="padding">
+      <div ng-show="exception.code" class="item item-icon-left assertive item-wrap" href="#">
+        <i class="icon ion-ios-locked"></i>
+        {{exception.message}}
+     </div>
       <div class="list list-inset">
           <label class="item item-input">
               <input type="text" placeholder="Username" name="email" ng-model="userLogin.email">

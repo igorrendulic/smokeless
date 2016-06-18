@@ -1,3 +1,4 @@
+// app routing config
 app.config(function($stateProvider, $urlRouterProvider) {
   $stateProvider
    .state('login', {

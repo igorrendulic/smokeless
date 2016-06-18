@@ -2,7 +2,7 @@
 <widget id="com.ionicframework.smokeless523963" version="0.0.1" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>smokeless</name>
     <description>
-        Smokeless Ionic Framework and Cordova project.
+        Smokeless - Smoke logging and exploratory application for Firebase.
     </description>
     <author email="igor.amplio@gmail.com" href="http://www.amplio.si/">
       Igor Rendulic

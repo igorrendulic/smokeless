@@ -1,3 +1,4 @@
+// reference to Auth
 app.factory("Auth", ["$firebaseAuth",
   function($firebaseAuth) {
    return $firebaseAuth();
@@ -23,6 +24,7 @@ firebase.database().ref().child('.info/connected').on('value', function(connecte
   }
 });
 
+// TODO: check if can remove (is it still needed?)
 app.factory("login", function() {
   var loggedInUser = {};
 
@@ -79,11 +81,11 @@ app.factory("ListOperations", function($firebaseArray) {
 app.service('Utils', function() {
 	
 	// days since 1/1/1970
-	this.daynumber = function() {
-		var timezone = new Date().getTimezoneOffset() * 60 * 1000;
-		return Math.floor((new Date().getTime() - timezone) / (1000 * 60 * 60 * 24));
+	this.daynumber = function(date) {
+		var timezone = date.getTimezoneOffset() * 60 * 1000;
+		return Math.floor((date.getTime() - timezone) / (1000 * 60 * 60 * 24));
 	};
-
+	// money saved calculations
 	this.moneysaved = function(pricePerPack, numberOfSmoked, total, days) {
 		var saved = 0;
 		if (pricePerPack && numberOfSmoked) {
@@ -98,7 +100,7 @@ app.service('Utils', function() {
     	}
     	return saved;
 	};
-
+	// money spent calculations
 	this.moneyspent = function(pricePerPack, numberOfSmoked, total) {
 		var spent = 0;
 		if (pricePerPack && numberOfSmoked && total > 0) {
@@ -108,6 +110,7 @@ app.service('Utils', function() {
 		return spent;
 	};
 
+	// reverting from daynumber to date
 	this.daynumberToDate = function(daynumber) {
 		var tzOffsetMs = new Date().getTimezoneOffset() * 60 * 1000;
 		return new Date(daynumber * 1000 * 60 * 60 * 24 + (tzOffsetMs));

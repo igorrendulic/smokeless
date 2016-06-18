@@ -1,86 +1,9 @@
-app.controller("SmokeController", function($scope, ListOperations, $firebaseObject,SmokesPerDay, Auth, $location, currentAuth, Utils) {
-
-
-  if (Auth.$getAuth() == null) {
-    $location.url('/'); 
-  } 
-
-  var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
-
-  $scope.loggedInEmail = currentAuth.email;
-
-  $scope.smokes = ListOperations.initialLoad(currentAuth, ref);
-
-  // // TODO: move to utilitiy factory
-  // var smokesConcat = function(firebaseResults) {
-  //     firebaseResults.forEach(function(data) {
-  //         $scope.smokes.push(data);
-  //     }); 
-  // };
-
-  // smokesArray.$loaded().then(function() {
-  //   smokesConcat(smokesArray);
-  //   if (smokesArray.length < 9) {
-  //     $scope.endReached = true;
-  //   }
-  // });
-
-  // smokesArray.$watch(function(event) {
-  //   console.log(event);
-  //   if (event.event == 'child_removed' || event.event == 'child_added') {
-  //     console.log('in here');
-  //   }
-  // });
-
-  // $scope.moreDataCanBeLoaded = function() {
-  //   if ($scope.endReached) {
-  //     return false;
-  //   }
-  //   return true;
-  // };
-
-  // $scope.loadMoreData = function() {
-  //   console.log('load more called');
-  //   if ($scope.smokes.length > 9) {
-  //     var lastItem = $scope.smokes[$scope.smokes.length - 1];
-  //     var smokesMore = ListOperations.loadFromStart(currentAuth, ref, lastItem.priority);
-  //     smokesMore.$loaded().then(function() {
-  //       if (smokesMore.length > 1) {
-  //         smokesConcat(smokesMore);
-  //       } else {
-  //         console.log("end reached = true");
-  //         $scope.endReached = true;
-  //       }
-  //       $scope.$broadcast('scroll.infiniteScrollComplete');
-  //     });
-  //   } else {
-  //     $scope.endReached = true;
-  //   }
-  // };
-
-  $scope.removeSmoke = function(smoke) {
-    $scope.smokes.$remove(smoke);
-
-    var smokesPerDay = SmokesPerDay(currentAuth, Utils.daynumber());
-    // add today smokes
-    smokesPerDay.$loaded().then(function() {
-        if (smokesPerDay.count == null) {
-          smokesPerDay = 0;
-        } else if (smokesPerDay.count >= 1) {
-          smokesPerDay.count -= 1;
-        } 
-        
-        smokesPerDay.$save();
-    });
-
-  };
-});
-
-
+// Login controller
 app.controller("LoginController", function($scope, $state, Auth, login, $location, currentAuth) {
   var ref = firebase.database().ref();
   $scope.auth = Auth;
   $scope.userLogin = {};
+  $scope.exception = {};
 
   Auth.$onAuthStateChanged(function(authData) {
       if (authData) {
@@ -97,20 +20,55 @@ app.controller("LoginController", function($scope, $state, Auth, login, $locatio
   };
 
   $scope.login = function() {
-
-    console.log($scope.userLogin.email);
-    
     $scope.auth.$signInWithEmailAndPassword($scope.userLogin.email,$scope.userLogin.password).then(function(authData) {
-      console.log("Logging in called!");
-      console.log(authData);
-    }, function() {}).catch(function(error) {
-      console.log(error);
-      console.log("Error?");
+      console.log(authData); // handling auth on promise
+    }).catch(function(error) {
+      if (error.code == 'auth/user-not-found') {
+        $scope.exception.message = 'User not found. Please register first.';
+      } else {
+        $scope.exception.message = error.message;
+      }
+      $scope.exception.code = error.code;
     });
   };
 
 });
 
+// Registration
+app.controller('RegisterController', function($scope, $state, Auth, Utils, $firebaseObject) {
+  var ref = firebase.database().ref();
+  $scope.exception = {};
+
+  Auth.$onAuthStateChanged(function(firebaseUser) {
+    if (firebaseUser) {
+      console.log("Logged in as:", firebaseUser.uid);
+
+      var refUsers = firebase.database().ref().child("users/" + firebaseUser.uid);
+      var users = $firebaseObject(refUsers);
+      users.$bindTo($scope, "users");
+      users.fullname = $scope.register.fullname;
+      users.$save();
+      $state.go('tabs.dash');
+    } else {
+      console.log("Logged out");
+    }
+  });
+
+  $scope.register = function() {
+    
+    if ($scope.register.fullname && $scope.register.email && $scope.register.password) {
+
+      Auth.$createUserWithEmailAndPassword($scope.register.email, $scope.register.password).then(function(firebaseUser) {
+        return firebaseUser;
+      }).catch(function(error) {
+        $scope.exception.message = error.message;
+        $scope.exception.code = error.code;
+      });
+    }
+  };
+});
+
+// Dashboard
 app.controller("DashController", function($scope, Auth, login, $state, $firebaseArray,$firebaseObject,currentAuth, Utils, SmokesPerDay, SmokesPerDayList) {
   
   if (Auth.$getAuth() == null) {
@@ -127,7 +85,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
   });
 
   // display number of smoked today
-  var smokesPerDay = SmokesPerDay(currentAuth, Utils.daynumber());
+  var smokesPerDay = SmokesPerDay(currentAuth, Utils.daynumber(new Date()));
   smokesPerDay.$bindTo($scope, "smokesPerDay");
 
   $scope.smokedUntilNow = SmokesPerDayList(currentAuth);
@@ -154,17 +112,16 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
     smokes.$add({
           timestamp: new Date().getTime(),
           priority: 0 - new Date().getTime()
-    });
-
-
-    // add today smokes
-    smokesPerDay.$loaded().then(function() {
+    }).then(function(addedRef) {
+      // add today smokes if add successfull
+      smokesPerDay.$loaded().then(function() {
         if (smokesPerDay.count == null) {
           smokesPerDay.count = 0;
         }
         smokesPerDay.count += 1;
         smokesPerDay.$save();
         $scope.smokesPerDay.count = smokesPerDay.count;
+      });
     });
   };
 
@@ -174,107 +131,7 @@ app.controller("DashController", function($scope, Auth, login, $state, $firebase
 
 });
 
-app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject,$firebaseUtils, login, currentAuth, Utils) {
-  if (Auth.$getAuth() == null) {
-    $state.go('/');
-  } 
-
-  $scope.loggedInAs = currentAuth.email;
-
-  var ref = firebase.database().ref().child("settings/" + currentAuth.uid);
-  var syncSettings = $firebaseObject(ref);
-
-  syncSettings.$bindTo($scope, "settings");
-
-  var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
-  var userObject = $firebaseObject(userRef);
-  userObject.$bindTo($scope, "users");
-
-  $scope.profileLoaded = false;
-  userObject.$loaded().then(function() {
-    $scope.profileLoaded = true;
-  });
-
-    $scope.logout = function() {
-      console.log("logging out");
-      Auth.$signOut();
-      $state.go('login');
-      document.location.href="/";
-    };
-
-    $scope.takePhoto = function() {
-        var cameraEl = document.querySelector( '#cameraID' );
-        cameraEl.click();
-    };
-
-    $scope.uploadPhoto = function() {
-
-      if ($scope.profileLoaded) {
-        var cameraEl = document.querySelector( '#cameraID' );
-        var file = cameraEl.files[0];
-        var storageRef = firebase.storage().ref();
-         var metadata = {
-          'contentType': file.type
-        };
-        var uploadTask = storageRef.child('profile/' + currentAuth.uid + "/" + file.name).put(file, metadata);
-        
-        uploadTask.on('state_changed', null, function(error) {
-          console.error('Upload failed:', error);
-          
-        }, function() {
-          var url = uploadTask.snapshot.metadata.downloadURLs[0];
-          console.log('File available at', url);
-          userObject.profilephoto = url;
-          $scope.users.profilephoto = url;
-          userObject.$save();
-        });
-      } else {
-        $scope.networkProblems = "true";
-      }
-
-    }; 
-
-});
-
-app.controller('GroupTabsController', function ($scope, $state) {
-  $scope.goTab = function (el) {
-    $state.go('tabs.' + el);
-  };
-});
-
-app.controller('RegisterController', function($scope, $state, Auth, Utils, $firebaseObject) {
-  var ref = firebase.database().ref();
-
-  Auth.$onAuthStateChanged(function(firebaseUser) {
-  if (firebaseUser) {
-    console.log("Logged in as:", firebaseUser.uid);
-
-    var refUsers = firebase.database().ref().child("users/" + firebaseUser.uid);
-    var users = $firebaseObject(refUsers);
-    users.$bindTo($scope, "users");
-    users.fullname = $scope.register.fullname;
-    users.$save();
-    $state.go('tabs.dash');
-  } else {
-    console.log("Logged out");
-  }
-});
-
-  $scope.register = function() {
-    
-    if ($scope.register.fullname && $scope.register.email && $scope.register.password) {
-
-      Auth.$createUserWithEmailAndPassword($scope.register.email, $scope.register.password).then(function(firebaseUser) {
-        return firebaseUser;
-      }).catch(function(error) {
-        $scope.registerError = "true";
-        $scope.errorMessage = "" + error;
-        console.error("Error: " + error);
-      });
-    }
-  };
-});
-
+// Social
 app.controller('SocialController', function($scope,$state, Auth, currentAuth, $firebaseArray, $firebaseObject, $ionicPopup) {
 
   if (Auth.$getAuth() == null) {
@@ -379,6 +236,111 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
  
 });
 
+// Time Log
+app.controller("SmokeController", function($scope, ListOperations, $firebaseObject,SmokesPerDay, Auth, $location, currentAuth, Utils) {
+
+
+  if (Auth.$getAuth() == null) {
+    $location.url('/'); 
+  } 
+
+  var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
+
+  $scope.loggedInEmail = currentAuth.email;
+
+  $scope.smokes = ListOperations.initialLoad(currentAuth, ref);
+
+  $scope.removeSmoke = function(smoke) {
+    var dt = new Date(smoke.timestamp);
+    var daynumber = Utils.daynumber(dt);
+    var smokesPerDay = SmokesPerDay(currentAuth, daynumber);
+    
+    $scope.smokes.$remove(smoke).then(function(removedRef) {
+        // add today smokes
+        smokesPerDay.$loaded().then(function() {
+          if (smokesPerDay.count == null) {
+            smokesPerDay = 0;
+          } else if (smokesPerDay.count >= 1) {
+            smokesPerDay.count -= 1;
+          } 
+        
+        smokesPerDay.$save();
+      });
+    });
+  };
+});
+
+// Settings
+app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject,$firebaseUtils, login, currentAuth, Utils) {
+  if (Auth.$getAuth() == null) {
+    $state.go('/');
+  } 
+
+  $scope.loggedInAs = currentAuth.email;
+
+  var ref = firebase.database().ref().child("settings/" + currentAuth.uid);
+  var syncSettings = $firebaseObject(ref);
+
+  syncSettings.$bindTo($scope, "settings");
+
+  var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
+  var userObject = $firebaseObject(userRef);
+  userObject.$bindTo($scope, "users");
+
+  $scope.profileLoaded = false;
+  userObject.$loaded().then(function() {
+    $scope.profileLoaded = true;
+  });
+
+    $scope.logout = function() {
+      console.log("logging out");
+      Auth.$signOut();
+      $state.go('login');
+      document.location.href="/";
+    };
+
+    $scope.takePhoto = function() {
+        var cameraEl = document.querySelector( '#cameraID' );
+        cameraEl.click();
+    };
+
+    $scope.uploadPhoto = function() {
+
+      if ($scope.profileLoaded) {
+        var cameraEl = document.querySelector( '#cameraID' );
+        var file = cameraEl.files[0];
+        var storageRef = firebase.storage().ref();
+         var metadata = {
+          'contentType': file.type
+        };
+        var uploadTask = storageRef.child('profile/' + currentAuth.uid + "/" + file.name).put(file, metadata);
+        
+        uploadTask.on('state_changed', null, function(error) {
+          console.error('Upload failed:', error);
+          
+        }, function() {
+          var url = uploadTask.snapshot.metadata.downloadURLs[0];
+          console.log('File available at', url);
+          userObject.profilephoto = url;
+          $scope.users.profilephoto = url;
+          userObject.$save();
+        });
+      } else {
+        $scope.networkProblems = "true";
+      }
+
+    }; 
+
+});
+
+// Helper for switching tabs
+app.controller('GroupTabsController', function ($scope, $state) {
+  $scope.goTab = function (el) {
+    $state.go('tabs.' + el);
+  };
+});
+
+// Chart display
 app.controller('ChartController', function($scope,Auth, $firebaseArray, $state, SmokesForCharts, currentAuth, Utils) {
   $scope.goBack = function() {
     $state.go('tabs.dash');

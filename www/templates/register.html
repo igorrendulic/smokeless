@@ -1,5 +1,9 @@
 <ion-view view-title="Register" name="register-view">
   <ion-content class="padding">
+     <div ng-show="exception.code" class="item item-icon-left assertive item-wrap" href="#">
+        <i class="icon ion-ios-locked"></i>
+        {{exception.message}}
+     </div>
 
     <form name="registerForm">
         <div ng-show="registerError">{{errorMessage}}</div>
