@@ -22,6 +22,7 @@ app.run(["$rootScope", "$location","$ionicPlatform", function($rootScope, $locat
   $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
     // We can catch the error thrown when the $requireSignIn promise is rejected
     // and redirect the user back to the home page
+    console.log(event);
     if (error === "AUTH_REQUIRED") {
       $location.path("/");
     }
@@ -42,3 +43,26 @@ app.directive('a', function() {
         }
    };
 });
+
+// capturing click on elements in the app (used for tracking)
+app.directive('irEventClick', function () {
+return {
+    restrict: 'A',
+    scope: {
+        click: '&irEventClick'
+    },
+    controller: function ($scope) {
+
+    },
+    link: function (scope, elem, attrs) {
+        elem.bind('click', function () {
+          var json = JSON.parse(attrs.irEventClick);
+          console.log(json);
+          ga('send', {
+            hitType:json.name,
+            eventCategory:json.category
+          });
+          window.webkit.messageHandlers.trackEvent.postMessage(json);
+        });
+    }
+}});

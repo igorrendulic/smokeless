@@ -1,13 +1,13 @@
 <div class="bar bar-header">
   <h1 class="title">Dashboard</h1>
-  <button class="button button-dark  icon-left ion-ios-analytics" ng-click="showChart()">Show Chart</button>
+  <button class="button button-dark  icon-left ion-ios-analytics" ng-click="showChart()" ir-event-click='{"name":"show_chart","category":"Dashboard"}'>Show Chart</button>
 </div>
 <ion-view view-title="Dashboard">
 	<ion-content class="padding has-header">
 		
 		<div class="row">
 	   		<div class="col text-center">
-				<button class="button button-calm button-large icon-left ion-nuclear" ng-click="addsmoke()">
+				<button class="button button-calm button-large icon-left ion-nuclear" ng-click="addsmoke()" ir-event-click='{"name":"log_smoke","category":"Dashboard"}'>
 	  				Log Smoke
 				</button>
 			</div>
