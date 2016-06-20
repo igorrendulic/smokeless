@@ -17,7 +17,7 @@
               <input type="password" placeholder="Password" name="password" ng-model="userLogin.password">
           </label>
       </div>
-      <button class="button button-block button-calm" ng-click="login()">Login</button>
-      <button class="button button-block button-balanced" ng-click="showRegisterForm()">Register</button>
+      <button class="button button-block button-calm" ng-click="login()" ir-event-click='{"name":"login","category":"login"}'>Login</button>
+      <button class="button button-block button-balanced" ng-click="showRegisterForm()" ir-event-click='{"name":"user_register","category":"login"}'>Register</button>
   </ion-content>
 </ion-view>

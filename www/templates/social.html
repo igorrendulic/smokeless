@@ -1,6 +1,6 @@
 <div class="bar bar-header">
   <h1 class="title">Social</h1>
-  <button class="button button-dark ion-chatbubble" ng-click="addNewPost()"> Add Post</button>
+  <button class="button button-dark ion-chatbubble" ng-click="addNewPost()" ir-event-click='{"name":"add_post","category":"social"}'> Add Post</button>
 </div>
 <ion-view view-title="Dashboard">
   <ion-content class="padding has-header">
@@ -13,7 +13,7 @@
         <h2>{{item.authorName}}</h2>
         <p>{{item.timestamp | date:'short'}}</p>
         <div style="position: absolute; right: 20px; top: 10px;">
-          <button class="button icon ion-heart" ng-click="submitLike(item)">{{!item.likes ? ' 0' : ' ' + item.likes.length}} Likes</button>
+          <button class="button icon ion-heart" ng-click="submitLike(item)" ir-event-click='{"name":"add_like","category":"social"}'>{{!item.likes ? ' 0' : ' ' + item.likes.length}} Likes</button>
         </div>
       </div>
 
@@ -22,7 +22,7 @@
           <pre>{{item.message}}</pre>
         </p>
         <p>
-          <a href="#" ng-click="showComments = !showComments" class="subdued">{{!item.comments ? '0' : item.comments.length}} Comments</a>
+          <a href="#" ng-click="showComments = !showComments" class="subdued" ir-event-click='{"name":"show_comments","category":"social"}'>{{!item.comments ? '0' : item.comments.length}} Comments</a>
         </p>
       </div>
       <div ng-show="showComments">
@@ -41,7 +41,7 @@
              <label class="item item-input">
                   <input type="text" ng-model="social.newcomment" placeholder="Type in your comment here">
               </label>
-              <button type="submit" class="button button-full button-balanced" ng-click="submitNewComment(item)" >Submit comment</button>
+              <button type="submit" class="button button-full button-balanced" ng-click="submitNewComment(item)" ir-event-click='{"name":"add_comment","category":"social"}'>Submit comment</button>
           </form>
         </div>
     </div>
