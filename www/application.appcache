@@ -16,11 +16,6 @@ lib/highcharts/highcharts.js
 lib/ionic/fonts/ionicons.woff?v=2.0.1
 lib/ionic/fonts/ionicons.woff?v=2.0.1
 lib/ionic/fonts/ionicons.svg?v=2.0.1
-
-NETWORK:
-*
-http://*
-https://*
 js/firebaseConfig.js
 js/app.js
 js/config.js
@@ -34,4 +29,9 @@ templates/register.html
 templates/settings.html
 templates/social.html
 templates/tabs.html
+
+NETWORK:
+*
+http://*
+https://*
 index.html
