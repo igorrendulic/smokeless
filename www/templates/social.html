@@ -1,9 +1,13 @@
 <div class="bar bar-header">
   <h1 class="title">Social</h1>
-  <button class="button button-dark ion-chatbubble" ng-click="addNewPost()" ir-event-click='{"name":"add_post","category":"social"}'> Add Post</button>
+  <button class="button button-dark ion-chatbubble" ng-click="addNewPost()" ir-event-click='{"name":"add_post","category":"social"}' ng-show="internet.online"> Add Post</button>
 </div>
 <ion-view view-title="Dashboard">
   <ion-content class="padding has-header">
+     <div ng-hide="internet.online" class="item item-icon-left assertive item-wrap ng-hide" href="#">
+        <i class="icon ion-ios-locked"></i>
+        You're Offline. Feature available only Online!
+     </div>
     <div class="padding-top"></div>
     <div class="list card" ng-repeat="item in social">
 

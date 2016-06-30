@@ -84,8 +84,9 @@ app.config(function($stateProvider, $urlRouterProvider) {
    })
     .state('tabs.social', {
       url:"/social",
+      cache: false,
       views: {
-        'settings' : {
+        'social' : {
           templateUrl:"templates/social.html",
           controller: "SocialController",
         }

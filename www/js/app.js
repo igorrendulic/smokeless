@@ -2,7 +2,7 @@
 var app = angular.module('smokeless', ['ionic','firebase','ngMessages']);
 
 
-app.run(["$rootScope", "$location","$ionicPlatform", function($rootScope, $location, $ionicPlatform) {
+app.run(["$rootScope", "$location","$ionicPlatform","$state", function($rootScope, $location, $ionicPlatform, $state) {
   $ionicPlatform.ready(function() {
     if(window.cordova && window.cordova.plugins.Keyboard) {
       // Hide the accessory bar by default (remove this to show the accessory bar above the keyboard
@@ -19,13 +19,12 @@ app.run(["$rootScope", "$location","$ionicPlatform", function($rootScope, $locat
     }
   });
 
-  $rootScope.$on("$routeChangeError", function(event, next, previous, error) {
+  $rootScope.$on("$stateChangeError", function(event, next, previous, error) {
     // We can catch the error thrown when the $requireSignIn promise is rejected
     // and redirect the user back to the home page
-    console.log(event);
-    if (error === "AUTH_REQUIRED") {
-      $location.path("/");
-    }
+    console.log('Unauthenticated user.Redirecting to login...' + error);
+    console.log(error);
+    //window.location = "/";
   });
 
 }]);

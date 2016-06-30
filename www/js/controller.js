@@ -1,5 +1,5 @@
 // Login controller
-app.controller("LoginController", function($scope, $state, Auth, login, $location, currentAuth) {
+app.controller("LoginController", function($scope, $state, Auth, $location, currentAuth) {
   var ref = firebase.database().ref();
   $scope.auth = Auth;
   $scope.userLogin = {};
@@ -8,7 +8,6 @@ app.controller("LoginController", function($scope, $state, Auth, login, $locatio
   Auth.$onAuthStateChanged(function(authData) {
       if (authData) {
         console.log(authData);
-        login.set(authData);
         $state.go('tabs.dash');
      } else {
        $scope.loggedInInfo = "Please login!";
@@ -20,6 +19,7 @@ app.controller("LoginController", function($scope, $state, Auth, login, $locatio
   };
 
   $scope.login = function() {
+
     $scope.auth.$signInWithEmailAndPassword($scope.userLogin.email,$scope.userLogin.password).then(function(authData) {
       console.log(authData); // handling auth on promise
     }).catch(function(error) {
@@ -68,79 +68,62 @@ app.controller('RegisterController', function($scope, $state, Auth, Utils, $fire
   };
 });
 
-// Dashboard
-app.controller("DashController", function($scope, Auth, login, $state, $firebaseArray,$firebaseObject,currentAuth, Utils, SmokesPerDay, SmokesPerDayList) {
+// Dashboard (unfortunatelly angularfire firebaseObject does not work well offline so i had to implement Firebase "native" calls to datastore)
+app.controller("DashController", function($scope,$rootScope,$timeout,$interval, Auth,$SmokesPerDayService,$SmokesService,$state,currentAuth,Sync, SyncNow, Utils) {
   
-  if (Auth.$getAuth() == null) {
-    $state.go('/');
-  } 
+  Sync(currentAuth);
 
-  //settings calculate money saveed
-  var settingsRef = firebase.database().ref().child("settings/" + currentAuth.uid);
-  var settingsObject = $firebaseObject(settingsRef);
-  settingsObject.$bindTo($scope,"settings");
-  settingsObject.$watch(function(event) {
-    // TODO: trigger recalculation
-    console.log('TODO: when settings change update saved money: ' + event);
+  $scope.settings = {};
+  $scope.smokesPerDay = 0;
+  $scope.moneySaved = 0;
+  $scope.moneySpent = 0;
+  $scope.averagePerDay = 0;
+  $scope.numberOfOverallSmokes = 0;
+
+  $SmokesPerDayService.recalculate($scope);
+  var msSinceLastSmoke = new Date().getTime() - $scope.lastSmokeTime;
+  $scope.sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);
+
+  $scope.$on('refreshSmokeValues', function (event, value) {
+    $SmokesPerDayService.recalculate($scope);
   });
 
-  // display number of smoked today
-  var smokesPerDay = SmokesPerDay(currentAuth, Utils.daynumber(new Date()));
-  smokesPerDay.$bindTo($scope, "smokesPerDay");
-
-  $scope.smokedUntilNow = SmokesPerDayList(currentAuth);
-  $scope.smokedUntilNow.$watch(function(event) {
-    var total = 0;
-    var days = 0;
-    $scope.smokedUntilNow.forEach(function(data) {
-      total += data.count;
-      days++;
-    });
-    $scope.numberOfOverallSmokes = total;
-    $scope.averagePerDay = total / days;
-    // calc money saved
-    settingsObject.$loaded().then(function(settings) {
-      $scope.moneySaved = Utils.moneysaved(settings.pricePerPack,settings.numberOfSmoked, total, days);
-      $scope.moneySpent = Utils.moneyspent(settings.pricePerPack, settings.numberOfSmoked, total);
-    });
-
-  });
+  $interval(function() {
+    var msSinceLastSmoke = new Date().getTime() - $scope.lastSmokeTime;
+    $scope.sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);      
+  }, 15000);
 
   $scope.addsmoke = function() {
-    var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
-    var smokes =  $firebaseArray(ref);
-    smokes.$add({
-          timestamp: new Date().getTime(),
-          priority: 0 - new Date().getTime()
-    }).then(function(addedRef) {
-      // add today smokes if add successfull
-      smokesPerDay.$loaded().then(function() {
-        if (smokesPerDay.count == null) {
-          smokesPerDay.count = 0;
-        }
-        smokesPerDay.count += 1;
-        smokesPerDay.$save();
-        $scope.smokesPerDay.count = smokesPerDay.count;
-      });
-    });
+    $SmokesPerDayService.addSmoke(currentAuth);
+    $SmokesPerDayService.recalculate($scope);
+    $scope.smokes = $SmokesService.getList(50);
+    SyncNow(currentAuth);
   };
 
   $scope.showChart = function() {
+    $timeout(function(){
+      $rootScope.$broadcast('refreshChart', 'refresh chart from dash');
+    });
     $state.go('chart');
   };
 
 });
 
 // Social
-app.controller('SocialController', function($scope,$state, Auth, currentAuth, $firebaseArray, $firebaseObject, $ionicPopup) {
+app.controller('SocialController', function($scope,$state, Auth,Connection, currentAuth, $firebaseArray, $firebaseObject, $ionicPopup) {
 
-  if (Auth.$getAuth() == null) {
-    $state.go('/');
-  } 
+  $scope.internet = {online:true};
 
-  var ref = firebase.database().ref().child("social");
-  var query = ref.orderByChild("priority").limitToFirst(100);
-  $scope.social =  $firebaseArray(query);
+  if (connected) {
+      $scope.internet.online = true;
+
+      var ref = firebase.database().ref().child("social");
+      var query = ref.orderByChild("priority").limitToFirst(100);
+      
+      $scope.social =  $firebaseArray(query);
+  } else {
+      $scope.internet.online = false;
+  }
 
   var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
   var syncUsers = $firebaseObject(userRef);
@@ -237,51 +220,47 @@ app.controller('SocialController', function($scope,$state, Auth, currentAuth, $f
 });
 
 // Time Log
-app.controller("SmokeController", function($scope, ListOperations, $firebaseObject,SmokesPerDay, Auth, $location, currentAuth, Utils) {
+app.controller("SmokeController", function($scope, Auth, currentAuth, $SmokesPerDayService, $SmokesService, Sync,SyncNow) {
 
+  Sync(currentAuth);
 
-  if (Auth.$getAuth() == null) {
-    $location.url('/'); 
-  } 
+  $scope.smokes = $SmokesService.getList(50);
 
-  var ref = firebase.database().ref().child("smokes/" + currentAuth.uid);
-
-  $scope.loggedInEmail = currentAuth.email;
-
-  $scope.smokes = ListOperations.initialLoad(currentAuth, ref);
+  $scope.$on('refreshSmokeList', function (event, value) {
+    $scope.smokes = $SmokesService.getList(50); 
+  });
 
   $scope.removeSmoke = function(smoke) {
-    var dt = new Date(smoke.timestamp);
-    var daynumber = Utils.daynumber(dt);
-    var smokesPerDay = SmokesPerDay(currentAuth, daynumber);
-    
-    $scope.smokes.$remove(smoke).then(function(removedRef) {
-        // add today smokes
-        smokesPerDay.$loaded().then(function() {
-          if (smokesPerDay.count == null) {
-            smokesPerDay = 0;
-          } else if (smokesPerDay.count >= 1) {
-            smokesPerDay.count -= 1;
-          } 
-        
-        smokesPerDay.$save();
-      });
-    });
+    $SmokesPerDayService.removeSmoke(currentAuth,smoke);
+    $scope.smokes = $SmokesService.getList(50); 
+    SyncNow(currentAuth);
   };
 });
 
 // Settings
-app.controller("SettingsController", function($scope, $state, Auth,$firebaseObject,$firebaseUtils, login, currentAuth, Utils) {
-  if (Auth.$getAuth() == null) {
-    $state.go('/');
-  } 
+app.controller("SettingsController", function($scope, $rootScope, $state, Auth,$firebaseObject,$firebaseUtils, currentAuth, Utils, $Settings) {
 
   $scope.loggedInAs = currentAuth.email;
 
-  var ref = firebase.database().ref().child("settings/" + currentAuth.uid);
-  var syncSettings = $firebaseObject(ref);
+  $scope.settings = $Settings.get();
 
-  syncSettings.$bindTo($scope, "settings");
+  $scope.$watch('settings.numberOfSmoked', function(newValue, oldValue) {
+    if (!isNaN(newValue)) {
+      localStorage.setItem('settings', JSON.stringify($scope.settings));
+      $rootScope.$broadcast('refreshSmokeValues', 'from settings');
+    }
+  });
+  $scope.$watch('settings.pricePerPack', function(newValue, oldValue) {
+    if (!isNaN(newValue)) {
+      localStorage.setItem('settings', JSON.stringify($scope.settings));
+      $rootScope.$broadcast('refreshSmokeValues', 'from settings');
+    }
+  });
+
+  // var ref = firebase.database().ref().child("settings/" + currentAuth.uid);
+  // var syncSettings = $firebaseObject(ref);
+
+  // syncSettings.$bindTo($scope, "settings");
 
   var userRef = firebase.database().ref().child("users/" + currentAuth.uid);
   var userObject = $firebaseObject(userRef);
@@ -294,6 +273,7 @@ app.controller("SettingsController", function($scope, $state, Auth,$firebaseObje
 
     $scope.logout = function() {
       console.log("logging out");
+      localStorage.clear();
       Auth.$signOut();
       $state.go('login');
       document.location.href="/";
@@ -341,25 +321,15 @@ app.controller('GroupTabsController', function ($scope, $state) {
 });
 
 // Chart display
-app.controller('ChartController', function($scope,Auth, $firebaseArray, $state, SmokesForCharts, currentAuth, Utils) {
+app.controller('ChartController', function($scope,Auth, $firebaseArray, $state, currentAuth,$SmokesPerDayService, Utils) {
   $scope.goBack = function() {
     $state.go('tabs.dash');
   };
 
-  var smokedUntilNow = SmokesForCharts(currentAuth);
+  $scope.$on('refreshChart', function (event, value) {
+      var series = $SmokesPerDayService.getSmokesPerDayChartData();
 
-  smokedUntilNow.$watch(function(eventObject) {
-    var series = { name:"Smoked",colorByPoint:true, data:[] };
-    var count = 0;
-    smokedUntilNow.forEach(function(data) {
-        var date = Utils.daynumberToDate( data.$id);
-        var formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
-        var dataPoint = { name: formattedDate, y: data.count};
-        series.data.push(dataPoint);
-        count++;
-    });
-
-    Highcharts.chart('container', {
+    var chart = Highcharts.chart('container', {
         chart: {
             type: 'column'
         },
