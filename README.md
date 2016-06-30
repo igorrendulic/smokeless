@@ -2,7 +2,7 @@
 
 ### Project Goals
 
-The main goal was for me to learn ionic, angular, firebase and angularfire frameworks and in progress create an app that would help people reduce or even quit smoking. Project demonstrated usage of new AngularFire 2.0 library with firebase 3.0 javascript library on top of HTML5 Hyrid mobile app framework Ionic. 
+Learning Google's Firebase Realtime Datastore with LocalStorage and Sync to Firebase.
 
 You can download zip file or clone this git repo: git clone git@<span></span>github.com:igorrendulic/smokeless.git
 
@@ -32,15 +32,15 @@ Once it works locally you can init it as firebase project and use FREE [Google's
 
 ## Project dependencies
 
-No need to do anything. Already included in project.
+Already included in project.
 
 [Angular 1.5.3](https://angularjs.org/)
 
 [Firebase](https://firebase.google.com/)
 
-[Ionic Framework 1.3.1](http://ionicframework.com/)
+[Ionic Framework 1.3.1](http://ionicframework.com/) - only for css and html
 
-[AngularFire 2.0.0.](http://ionicframework.com/)
+[AngularFire 2.0.0.](https://github.com/angular/angularfire2)
 
 [Highcharts v4.2.5](http://www.highcharts.com/)
 
@@ -107,11 +107,6 @@ Smokes and Social lists can grow fairly large. In this case indexing is recommen
   }
 }
 ```
-
-## Known bugs
-
-1.Rotated user profile images if photo taken on iOS
-
 
 ## TODO
 
