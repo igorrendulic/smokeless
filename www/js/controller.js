@@ -68,6 +68,22 @@ app.controller('RegisterController', function($scope, $state, Auth, Utils, $fire
   };
 });
 
+function colorSinceLastSmoke($scope, sinceLastSmoke) {
+  var hr = sinceLastSmoke.hour;
+    var min = sinceLastSmoke.min;
+    var days = sinceLastSmoke.days;
+    $scope.lastSmokeStyle.style = {"color":"gray"};
+    if (days > 0) {
+      $scope.lastSmokeStyle.style = {"color":"green"};
+    } else if (hr < 2) {
+      $scope.lastSmokeStyle.style = {"color":"red"};
+    } else if (hr >= 2) {
+      $scope.lastSmokeStyle.style = {"color":"FF9900"};
+    }
+
+    $scope.sinceLastSmoke = days + " days " + hr + " hours " + min + " min";
+}
+
 // Dashboard (unfortunatelly angularfire firebaseObject does not work well offline so i had to implement Firebase "native" calls to datastore)
 app.controller("DashController", function($scope,$rootScope,$timeout,$interval, Auth,$SmokesPerDayService,$SmokesService,$state,currentAuth,Sync, SyncNow, Utils) {
   
@@ -81,8 +97,14 @@ app.controller("DashController", function($scope,$rootScope,$timeout,$interval, 
   $scope.numberOfOverallSmokes = 0;
 
   $SmokesPerDayService.recalculate($scope);
+
+
+  $scope.lastSmokeStyle = {};
+  $scope.lastSmokeStyle.style = {"color":"gray"};
+
   var msSinceLastSmoke = new Date().getTime() - $scope.lastSmokeTime;
-  $scope.sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);
+  var sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);
+  colorSinceLastSmoke($scope,sinceLastSmoke);
 
   $scope.$on('refreshSmokeValues', function (event, value) {
     $SmokesPerDayService.recalculate($scope);
@@ -90,7 +112,8 @@ app.controller("DashController", function($scope,$rootScope,$timeout,$interval, 
 
   $interval(function() {
     var msSinceLastSmoke = new Date().getTime() - $scope.lastSmokeTime;
-    $scope.sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);      
+    var sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);      
+    colorSinceLastSmoke($scope,sinceLastSmoke);
   }, 15000);
 
   $scope.addsmoke = function() {

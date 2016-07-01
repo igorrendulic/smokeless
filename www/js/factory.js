@@ -141,31 +141,6 @@ app.factory('Sync', function(Connection, SyncNow) {
 	}
 });
 
-// app.factory("SmokesForCharts", function($firebaseArray) {
-// 	return function(currentAuth) {
-// 		var ref = firebase.database().ref().child("smokesPerDay/" + currentAuth.uid);
-// 		var query = ref.limitToFirst(14);
-// 		return $firebaseArray(query);
-// 	}
-// });
-
-// app.factory("ListOperations", function($firebaseArray) {
-// 	var limit = 100;
-// 	var initialLoad = function(currentAuth, ref) {
-// 		var query = ref.orderByChild("priority").limitToFirst(limit);
-// 		return $firebaseArray(query);
-// 	};
-
-// 	var loadFromStart = function(currentAuth, ref, startPriority) {
-// 		var query = ref.orderByChild("priority").startAt(startPriority).limitToFirst(limit);
-// 		return $firebaseArray(query);
-// 	};
-// 	return {
-// 		initialLoad: initialLoad,
-// 		loadFromStart: loadFromStart
-// 	};
-// });
-
 app.service('Utils', function() {
 	
 	// days since 1/1/1970
@@ -217,7 +192,8 @@ app.service('Utils', function() {
 	    d++;
 	    h = 0;
 	  }
-	  return d + ' days ' + pad(h) + " hr " + pad(m) + " min"; //[d, pad(h), pad(m)].join(':');
+	  //return d + ' days ' + pad(h) + " hr " + pad(m) + " min"; //[d, pad(h), pad(m)].join(':');
+	  return {'days':d, 'hour':pad(h), 'min':pad(m)};
 	}
 
 });
