@@ -98,6 +98,16 @@ app.controller("DashController", function($scope,$rootScope,$timeout,$interval, 
 
   $SmokesPerDayService.recalculate($scope);
 
+  $scope.$on('refreshSmokeValues', function (event, value) {
+
+    $SmokesPerDayService.recalculate($scope);    
+    $scope.lastSmokeStyle = {};
+    $scope.lastSmokeStyle.style = {"color":"gray"};
+
+    var msSinceLastSmoke = new Date().getTime() - $scope.lastSmokeTime;
+    var sinceLastSmoke = Utils.daysHoursMinutesSince(msSinceLastSmoke);
+    colorSinceLastSmoke($scope,sinceLastSmoke);
+  });
 
   $scope.lastSmokeStyle = {};
   $scope.lastSmokeStyle.style = {"color":"gray"};

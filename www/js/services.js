@@ -30,7 +30,7 @@ app.service('$Settings', function() {
 	};
 });
 
-app.service('$SmokesPerDayService', function(Utils, $q, $rootScope) {
+app.service('$SmokesPerDayService', function(Utils, $q, $rootScope,$ionicListDelegate) {
 
 	this.addSmoke =  function(currentAuth) {
 		
@@ -100,6 +100,8 @@ app.service('$SmokesPerDayService', function(Utils, $q, $rootScope) {
 					localStorage.setItem(smokedPerDayKey, JSON.stringify(smokesPerDay));
 				}
 			}
+
+			$ionicListDelegate.closeOptionButtons();
 			$rootScope.$broadcast('refreshSmokeValues', 'from removing a smoke');
 		}
 	}
@@ -147,14 +149,22 @@ app.service('$SmokesPerDayService', function(Utils, $q, $rootScope) {
 
 		var series = { name:"Smoked",colorByPoint:true, data:[] };
   		var count = 0;
-		Object.keys(smokesPerDay).forEach(function(key) {
-			var todaySmoked = smokesPerDay[key];
-			var date = Utils.daynumberToDate(key);
-  		    var formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
-        	var dataPoint = { name: formattedDate, y: todaySmoked.count};
-  	      	series.data.push(dataPoint);
-        	count++;
-		});
+  		var BreakException= {};
+  		try {
+			Object.keys(smokesPerDay).forEach(function(key) {
+				var todaySmoked = smokesPerDay[key];
+				var date = Utils.daynumberToDate(key);
+	  		    var formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+	        	var dataPoint = { name: formattedDate, y: todaySmoked.count};
+	  	      	series.data.push(dataPoint);
+	        	count++;
+	        	if (count > 13) {
+	        		throw BreakException;
+	        	}
+			});
+		} catch (e) {
+			if (e!==BreakException) throw e;
+		}
 
 		series.data.reverse();
 		return series;

@@ -24,7 +24,7 @@ app.run(["$rootScope", "$location","$ionicPlatform","$state", function($rootScop
     // and redirect the user back to the home page
     console.log('Unauthenticated user.Redirecting to login...' + error);
     console.log(error);
-    //window.location = "/";
+    window.location = "/";
   });
 
 }]);

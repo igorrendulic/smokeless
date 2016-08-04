@@ -6,3 +6,4 @@ www/js/firebaseConfig.js
 node_modules/
 platforms/
 plugins/
+*.docx
