@@ -149,23 +149,29 @@ app.service('$SmokesPerDayService', function(Utils, $q, $rootScope,$ionicListDel
 
 		var series = { name:"Smoked",colorByPoint:true, data:[] };
   		var count = 0;
-  		var BreakException= {};
-  		try {
-			Object.keys(smokesPerDay).forEach(function(key) {
-				var todaySmoked = smokesPerDay[key];
-				var date = Utils.daynumberToDate(key);
-	  		    var formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
-	        	var dataPoint = { name: formattedDate, y: todaySmoked.count};
-	  	      	series.data.push(dataPoint);
-	        	count++;
-	        	if (count > 13) {
-	        		throw BreakException;
-	        	}
-			});
-		} catch (e) {
-			if (e!==BreakException) throw e;
-		}
 
+  		var count = Object.keys(smokesPerDay).length;
+  		if (count < 14) {
+  			count = 0;
+  		} else {
+  			count = count - 14;
+  		}
+  		console.log("COunt before: ", count);
+  		
+		Object.keys(smokesPerDay).forEach(function(key) {
+  	      	
+  	      	if (count <= 0) {
+  	      		var todaySmoked = smokesPerDay[key];
+				var date = Utils.daynumberToDate(key);
+  		    	var formattedDate = (date.getMonth() + 1) + '/' + date.getDate() + '/' +  date.getFullYear();
+        		var dataPoint = { name: formattedDate, y: todaySmoked.count};
+
+  	      		series.data.push(dataPoint);	
+  	      	}
+        	count--;
+		});
+
+		console.log("COunt after: ", count);
 		series.data.reverse();
 		return series;
 	}

@@ -368,10 +368,10 @@ app.controller('ChartController', function($scope,Auth, $firebaseArray, $state, 
             type: 'column'
         },
         title: {
-            text: 'Smokes cigarettes by day'
+            text: 'Smoked cigarettes by day'
         },
         subtitle: {
-            text: 'Showing last two weeks'
+            text: 'Showing last 14 days of logged smokes'
         },
         xAxis: {
             type: 'category'
